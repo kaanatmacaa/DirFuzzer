@@ -50,6 +50,7 @@ Lightweight directory brute-force extension for Burp Suite. Includes filtering, 
 Example screenshots
 
 Simple directory fuzzing:
+<img width="1438" alt="resim" src="https://github.com/user-attachments/assets/ba620f51-0e5e-4b77-98c3-d1788895a123" />
 
 
 Add custom headers:
