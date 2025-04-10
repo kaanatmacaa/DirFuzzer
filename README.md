@@ -2,6 +2,7 @@
 Lightweight directory brute-force extension for Burp Suite. Includes filtering, coloring, CSV export, custom headers, method selection, and more...
 
 ✨ Features
+
 🚀 Fuzzing Core
 
     Sends directory fuzzing requests using the provided wordlist
@@ -45,4 +46,4 @@ Lightweight directory brute-force extension for Burp Suite. Includes filtering, 
 ✅ Fast setup
 ✅ Flexible for black-box or authenticated fuzzing
 ✅ Built for real-world assessments by a penetration tester
-📜 License
+
