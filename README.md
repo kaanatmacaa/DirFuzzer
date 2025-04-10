@@ -47,3 +47,31 @@ Lightweight directory brute-force extension for Burp Suite. Includes filtering, 
 ✅ Flexible for black-box or authenticated fuzzing
 ✅ Built for real-world assessments by a penetration tester
 
+Example screenshots
+
+Simple directory fuzzing:
+
+
+Add custom headers:
+<img width="1429" alt="resim" src="https://github.com/user-attachments/assets/515ccc49-092e-468e-a734-26a7e510c8ab" />
+
+Filter results:
+Select status code:
+<img width="1433" alt="resim" src="https://github.com/user-attachments/assets/32f516c9-1df5-4a5d-aa2f-13c00be2a5db" />
+
+Exclude status code:
+<img width="1431" alt="resim" src="https://github.com/user-attachments/assets/03ed2dbd-bc84-4d28-97de-4d26a00e5d6f" />
+
+Exclude length:
+<img width="1439" alt="resim" src="https://github.com/user-attachments/assets/02ffcb8d-33d9-4e19-851f-90e69f43afe1" />
+
+Colorize results:
+<img width="1435" alt="resim" src="https://github.com/user-attachments/assets/18966114-a824-4d47-a844-653a34be350a" />
+
+Send to repeater or intruder:
+<img width="1433" alt="resim" src="https://github.com/user-attachments/assets/5301ec8c-c689-4787-9271-8cb08beb9c9c" />
+
+Export CSV:
+<img width="1434" alt="resim" src="https://github.com/user-attachments/assets/948cc540-850f-4571-81e5-c1ba1c309031" />
+
+
