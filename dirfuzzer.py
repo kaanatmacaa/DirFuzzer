@@ -9,6 +9,7 @@ from java.net import URL
 from threading import Thread
 import javax.swing.RowFilter as RowFilter
 from java.awt.event import MouseAdapter, MouseEvent
+from javax.swing import SwingUtilities
 
 class BurpExtender(IBurpExtender, ITab):
     def registerExtenderCallbacks(self, callbacks):
@@ -34,6 +35,7 @@ class BurpExtender(IBurpExtender, ITab):
 
         self.url_field = JTextField("http://example.com/", 20)
         self.method_selector = JComboBox(["GET", "POST", "HEAD"])
+        self.thread_filter = JComboBox(["1", "2", "3", "4", "5", "6", "7", "8", "9","10","11","12","13","14","15"])
         self.header_field = JTextField("", 15)
         wordlist_button = JButton("Select Wordlist", actionPerformed=self.load_wordlist)
         self.fuzz_button = JButton("Start Fuzzing", actionPerformed=self.start_fuzzing)
@@ -41,6 +43,8 @@ class BurpExtender(IBurpExtender, ITab):
 
         top_panel_1.add(self.url_field)
         top_panel_1.add(self.method_selector)
+        top_panel_1.add(JLabel("Thread:"))
+        top_panel_1.add(self.thread_filter)
         top_panel_1.add(JLabel("Custom Header:"))
         top_panel_1.add(self.header_field)
         top_panel_1.add(wordlist_button)
@@ -112,7 +116,6 @@ class BurpExtender(IBurpExtender, ITab):
         self.table.addMouseListener(TableMouseListener(self.table, popup_menu))
 
 
-
         def send_to_repeater(event):
             row = self.table.getSelectedRow()
             if row == -1:
@@ -145,6 +148,7 @@ class BurpExtender(IBurpExtender, ITab):
             self.wordlist_path = chooser.getSelectedFile().getAbsolutePath()
             self.wordlist_label.setText("Wordlist: " + self.wordlist_path)
 
+
     def start_fuzzing(self, event):
         if not self.wordlist_path:
             self.wordlist_label.setText("Please select a wordlist first.")
@@ -155,23 +159,35 @@ class BurpExtender(IBurpExtender, ITab):
             self.fuzzedItems = []
             self.table_model.setRowCount(0)
             self.fuzz_button.setText("Stop Fuzzing")
+
             url = self.url_field.getText()
             method = self.method_selector.getSelectedItem()
-            self.fuzz_thread = Thread(target=self.fuzz, args=[url, method])
-            self.fuzz_thread.start()
+
+            try:
+                with open(self.wordlist_path, "r") as f:
+                    all_paths = [line.strip() for line in f if line.strip()]
+            except:
+                self.wordlist_label.setText("Error reading wordlist.")
+                self.fuzz_button.setText("Start Fuzzing")
+                return
+
+            thread_count = int(self.thread_filter.getSelectedItem())
+            chunk_size = max(1, len(all_paths) // thread_count)
+            self.fuzz_threads = []
+
+            for i in range(0, len(all_paths), chunk_size):
+                chunk = all_paths[i:i + chunk_size]
+                t = Thread(target=self.fuzz, args=[url, method, chunk])
+                t.start()
+                self.fuzz_threads.append(t)
+
         else:
             self._stop_fuzzing = True
             self.fuzz_button.setText("Start Fuzzing")
 
-    def fuzz(self, base_url, method):
-        try:
-            with open(self.wordlist_path, "r") as f:
-                paths = [line.strip() for line in f if line.strip()]
-        except:
-            self.wordlist_label.setText("Error reading wordlist.")
-            self.fuzz_button.setText("Start Fuzzing")
-            return
 
+
+    def fuzz(self, base_url, method, paths):
         for path in paths:
             if self._stop_fuzzing:
                 break
@@ -204,13 +220,21 @@ class BurpExtender(IBurpExtender, ITab):
                 length = len(response.getResponse())
 
                 self.fuzzedItems.append((path, status_code, length, request, response, http_service))
-                self.table_model.addRow([path, status_code, length])
+
+                request_line = self._helpers.analyzeRequest(request).getHeaders()[0]
+                real_path = request_line.split(" ")[1]
+
+                def update_row():
+                    self.table_model.addRow([real_path, status_code, length])
+                SwingUtilities.invokeLater(update_row)
 
             except:
                 self.fuzzedItems.append((path, "Error", "0", None, None, None))
-                self.table_model.addRow([path, "Error", "0"])
 
-        self.fuzz_button.setText("Start Fuzzing")
+                def update_row_error():
+                    self.table_model.addRow([path, "Error", "0"])
+                SwingUtilities.invokeLater(update_row_error)
+
 
     def apply_filter(self, event=None):
         selected_status = self.status_filter.getSelectedItem()
